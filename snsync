@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""
+    snsync, a rsync client for Simplenote.
+    
+    - This is a wrapper without a file extension to allow you to type "snsync"
+"""
+from simplenote_sync import snsync
+
+if __name__ == '__main__':
+    snsync.main()
