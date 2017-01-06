@@ -10,4 +10,4 @@ snsync is a kinda rsync implementation for Simplenote where your notes can be do
 
 The primary use case is for periodic synchronisation by cron, with all the *useful* output going to a log file and the console output being *pretty* for when humans sync manually.
 
-
+Documentation can be found at https://snsync.readthedocs.io/
