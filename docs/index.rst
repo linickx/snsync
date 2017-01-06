@@ -9,6 +9,9 @@ Welcome to snsync documentation!
 .. toctree::
    :maxdepth: 2
 
+   index
+   developer
+
 snsync is a kinda rsync implementation for Simplenote where your notes can be downloaded (& and uploaded) from plain text files.
 
 .. image:: snsync_screenshot.gif

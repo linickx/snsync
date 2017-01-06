@@ -24,8 +24,9 @@
 import os
 
 # TODO
-#import sys
-#sys.path.append(os.path.abspath(os.pardir + "/simplenote_sync/"))
+import sys
+sys.path.append(os.path.abspath(os.pardir))
+from simplenote_sync import snsync
 
 # -- General configuration ------------------------------------------------
 
