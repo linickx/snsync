@@ -80,7 +80,7 @@ OPTIONS:
  -h, --help         Help!
  -d, --dry-run      Dry Run Mode (no changes made/saved)
  -s, --silent       Silent Mode (no std output)
- -c, --config=      Config file to read (default: ~/.snsync) 
+ -c, --config=      Config file to read (default: ~/.snsync)
 
 Version: %s
 ''' % __version__)
@@ -99,7 +99,7 @@ def main(argv=sys.argv[1:]):
     # CMD Line options
     try:
         opts, args = getopt.getopt(argv,
-                                   'hds:c:',
+                                   'hdsc:',
                                    ['help', 'dry-run', 'silent', 'config='])
     except:
         logger.debug("Exception: %s", sys.exc_info()[1])
