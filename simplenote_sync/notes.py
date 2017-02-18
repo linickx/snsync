@@ -80,7 +80,13 @@ class Note:
             Generate Safe Filename from Note Content
         """
         note_data = str.splitlines(content)
-        line_one = note_data[0]
+        try:
+            line_one = note_data[0]
+        except:
+            self.log.info("Probable Empty note, no first line note content -> %s", str(content))
+            self.log.debug("Exception: %s", sys.exc_info()[1])
+            return False
+
         file_ext = self.config.get_config('cfg_nt_ext')
         filename_len = int(self.config.get_config('cfg_nt_filenamelen'))
 
