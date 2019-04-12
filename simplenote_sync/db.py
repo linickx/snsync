@@ -9,7 +9,7 @@ import json
 # pylint: disable=C0301
 
 
-db_version = int("1") # Increment this with DB/Schema updates.
+db_version = int("2") # Increment this with DB/Schema updates.
 
 class Database:
     """
@@ -27,7 +27,7 @@ class Database:
         if not self.isSQLite3(filename):
             self.log.warning("404 DB not found: %s", filename)
             self.dbconn, self.db = self.connect(filename)
-            self.createdb_schmea_1()
+            self.createdb_schmea_2()
         else:
             self.dbconn, self.db = self.connect(filename)
 
@@ -35,6 +35,9 @@ class Database:
             version = self.get_schema_version()
             if version == db_version:
                 self.log.debug("File Version: %s  Our Version: %s", version, db_version)
+            elif (version == 1) and (db_version == 2):
+                self.log.info("File Version: %s  Our Version: %s", version, db_version)
+                self.upgradedb_schmea_1to2()
             else:
                 self.log.critical("Database Version/Schemea Mismatch! - File Version: %s  Our Version: %s", version, db_version)
                 sys.exit(1)
@@ -128,6 +131,78 @@ class Database:
             self.log.debug("Exception: %s", sys.exc_info()[1])
             sys.exit(1)
 
+    def createdb_schmea_2(self):
+        """
+            Create a DB (Schema Version 2)
+
+            Simperium uses a different scheme
+        """
+        self.log.info("Creating new version 2 database")
+        version = int("2")
+
+        try:
+            self.dbconn.execute('CREATE TABLE simplenote (\
+                key TEXT PRIMARY KEY,\
+                createdate BLOB,\
+                deleted TEXT,\
+                modifydate BLOB,\
+                systemtags TEXT,\
+                tags TEXT,\
+                version TEXT\
+                )')
+            self.dbconn.execute('CREATE TABLE notefile (\
+                key TEXT PRIMARY KEY,\
+                createdate TEXT,\
+                deleted TEXT,\
+                modifydate TEXT,\
+                filename TEXT\
+                )')
+            self.dbconn.execute('CREATE TABLE snsync (\
+                name TEXT PRIMARY KEY,\
+                value BLOB\
+                )')
+            self.set_schema_version(version)
+        except sqlite3.OperationalError:
+            self.log.error("Unabled to setup local database")
+            self.log.debug("Exception: %s", sys.exc_info()[1])
+            sys.exit(1)
+
+    def upgradedb_schmea_1to2(self):
+        """
+            Upgrade Version 1 DB to Version 2
+
+        """
+        self.log.info("Upgrading to Version 2 Database")
+        version = int("2")
+
+        try:
+
+            self.dbconn.execute('ALTER TABLE simplenote RENAME TO simplenote_v1')
+
+            self.dbconn.execute('CREATE TABLE simplenote (\
+                key TEXT PRIMARY KEY,\
+                createdate BLOB,\
+                deleted TEXT,\
+                modifydate BLOB,\
+                systemtags TEXT,\
+                tags TEXT,\
+                version TEXT\
+                )')
+
+            self.dbconn.execute('INSERT INTO simplenote (\
+                key,createdate,deleted,modifydate,systemtags,tags,version\
+                ) SELECT key,createdate,deleted,modifydate,systemtags,tags,version\
+                FROM simplenote_v1\
+            ')
+
+            self.set_schema_version(version)
+            self.dbconn.commit()
+
+        except sqlite3.OperationalError:
+            self.log.error("Unabled to setup local database")
+            self.log.debug("Exception: %s", sys.exc_info()[1])
+            sys.exit(1)
+
     def find_sn_by_key(self, key):
         """
             Find a simple note by key
@@ -153,12 +228,10 @@ class Database:
             note['key'] = key_row[0]
             note['createdate'] = key_row[1]
             note['deleted'] = key_row[2]
-            note['minversion'] = key_row[3]
-            note['modifydate'] = key_row[4]
-            note['syncnum'] = key_row[5]
-            note['systemtags'] = key_row[6]
-            note['tags'] = key_row[7]
-            note['version'] = key_row[8]
+            note['modifydate'] = key_row[3]
+            note['systemtags'] = key_row[4]
+            note['tags'] = key_row[5]
+            note['version'] = key_row[6]
             self.log.debug("SIMPLENOTE: %s", note)
             return note
 
@@ -171,10 +244,10 @@ class Database:
             self.log.debug("Updating SN Database: %s", note)
 
             self.db.execute('INSERT OR REPLACE INTO Simplenote \
-                (key, createdate, deleted, minversion, modifydate, syncnum, systemtags, tags, version) \
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', (\
+                (key, createdate, deleted, modifydate, systemtags, tags, version) \
+                VALUES (?, ?, ?, ?, ?, ?, ?)', (\
                 note['key'],note['createdate'],note['deleted'],\
-                note['minversion'],note['modifydate'],note['syncnum'],\
+                note['modifydate'],\
                 json.dumps(note['systemtags']),json.dumps(note['tags']),note['version'],)\
                 )
             return True
