@@ -369,6 +369,8 @@ def main(argv=sys.argv[1:]):
                     nf['content'] = notefile_full['content']
                     nf['modifydate'] = notefile_full['modifydate']
                     nf['version'] = n['version']
+                    nf['tags'] = n['tags']
+                    nf['systemTags'] = n['systemTags']
 
                     note_update = simplenote.update_note(nf)
                     logger.debug('API Result: %s', note_update)
