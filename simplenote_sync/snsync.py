@@ -56,7 +56,6 @@ from .notes import Note
 from .version import __version__
 
 
-__version__ = "0.1" # Version Ctl
 start_time = time.monotonic() # Simple Performance Monitoring
 
 logger = logging.getLogger("snsync")
