@@ -1,4 +1,4 @@
-snsync, like rsync for Simplenote 
+snsync, like rsync for Simplenote
 ##################################
 
 snsync is a kinda rsync implementation for Simplenote where your notes can be downloaded (& and uploaded) from plain text files.
@@ -27,6 +27,21 @@ A few additional options are possible:
 * `cfg_log_path = /Users/Library/Logs/snsync.log` to change the default log path (which is typically within `cfg_nt_path`). Use the keyword `DISABLED` to enable console logging.
 * `cfg_log_level = debug` the default logging level is `info`, the brave can change this to `error`, ninja's can enable `debug`
 
+Environment Variables
+------------------------
+
+Each of the above configuration options can be over-ridden by environment variables, this is useful if you want to run `snsync` in a container.
+
+* `sn_username` = Simplenote username
+* `sn_password` = Simplenote password
+* `sn_nt_ext` = Local note file extension (`.txt` by default)
+* `sn_nt_path` = Folder path to store local files
+* `sn_nt_trashpath` = Folder path for the `trash` directory
+* `sn_log_level` = Logging level
+* `sn_db_path` = Path for the local .sqllite database
+* `sn_log_path` = Path for the local log file
+
+
 The command line options
 ------------------------
 
@@ -39,7 +54,7 @@ The following usage/options are available::
      -d, --dry-run      Dry Run Mode (no changes made/saved)
      -s, --silent       Silent Mode (no std output)
      -c, --config=      Config file to read (default: ~/.snsync)
-     
+
 For example: just `snsync` on it's own should work, but something like this can be used for cron: `snsync -s --config=something.txt`
 
 File Deletions
