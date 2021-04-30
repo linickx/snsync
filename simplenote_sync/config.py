@@ -107,7 +107,7 @@ class Config:
             else:
                 val_sn_log_path = os.path.join(cp.get(cfg_sec, 'cfg_nt_path'), '.snsync.log')
         else:
-            val_sn_log_level = os.environ.get('sn_log_path')
+            val_sn_log_path = os.environ.get('sn_log_path')
         self.configs['cfg_log_path'] = [val_sn_log_path, 'snsync log location']
 
 
