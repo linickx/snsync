@@ -85,6 +85,33 @@ Large Note Databases
 
 The Simplenote API is rate limited, if your note database is large (like mine -> 1,200 notes) then the first full sync will take a long time (mine -> approx 15mins) you will also find a high number of `HTTP ERRORS` reported, just wait and re-run the script, missed notes will be downloaded.
 
+Docker
+--------------------
+
+snsync can be run inside a docker container::
+
+    docker run -ti linickx/snsync:latest
+
+This will output snsync, in the normal way with hashes showing the progres. A better way to is to enable console logging (by disabling the log file)::
+
+    docker run -ti -e sn_log_path="DISABLED" linickx/snsync:latest
+
+This will produce a much more docker friendly output.
+
+Containers by default are disposable, therefore you will want to map the `~/Simplenote` directory to something local like::
+
+    docker run -ti -v /home/nick/notes:/root/Simplenote snsync:latest
+
+You will then need to make a decsion on credentials, one option is environment variables ::
+
+    docker run -ti -e sn_username -e sn_password -v /home/nick/notes:/root/Simplenote linickx/snsync:latest
+
+...another option is to mount an snsync config file ::
+
+    docker run -ti -v /home/nick/notes:/root/Simplenote -v /home/nick/.snsync:/root/.snsync linickx/snsync:latest
+
+Finally, docker run is a one-time operation, you can over-ride the entrypoint and use crond to periodically sync your notes. An `example docker-compose <https://github.com/linickx/snsync/blob/master/docs/docker-compose.yml>`_ file can be found in the docs directory, along with `a contab file <https://github.com/linickx/snsync/blob/master/docs/crontab>`_. (Note the example contab runs every 5 mins, that means you have to wait 5mins before anything will happen!)
+
 AoB
 ---
 
