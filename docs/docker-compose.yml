@@ -1,0 +1,13 @@
+version: '2'
+services:
+
+  snsync:
+    image: linickx/snsync:latest
+    entrypoint: ['crond', '-f']
+    environment:
+        - sn_log_path=DISABLED
+        - sn_log_level=info
+    volumes:
+    - ./crontab:/etc/crontabs/root
+    - ./config.ini:/root/.snsync
+    - ./Simplenote:/root/Simplenote
