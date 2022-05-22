@@ -56,7 +56,7 @@ class Note:
 
     def write(self, note, filename, access_time):
         try:
-            f = open(filename, 'w')
+            f = open(filename, 'w', encoding='utf-8')
             f.write(note['content'])
             f.close()
             self.log.info("Writing %s", filename)
@@ -163,7 +163,7 @@ class Note:
 
         if os.path.isfile(path + "/" + filename):
             try:
-                f = open(path + "/" + filename, 'r')
+                f = open(path + "/" + filename, 'r', encoding='utf-8')
                 notefile['content'] = f.read()
                 f.close()
             except:
