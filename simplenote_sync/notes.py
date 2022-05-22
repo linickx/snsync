@@ -64,7 +64,7 @@ class Note:
             os.utime(filename, (access_time, float(note['modifydate'])))
             return filename
         except:
-            self.log.error("Error writing note: %s", note['key'])
+            self.log.error("Error writing note id: %s, %r", note['key'], filename, exc_info=True)
             self.log.debug("Exception: %s", sys.exc_info()[1])
         return False
 
