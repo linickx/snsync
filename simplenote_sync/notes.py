@@ -54,6 +54,20 @@ class Note:
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 sys.exit(1)
 
+    def write(self, note, filename, access_time):
+        try:
+            f = open(filename, 'w')
+            f.write(note['content'])
+            f.close()
+            self.log.info("Writing %s", filename)
+
+            os.utime(filename, (access_time, float(note['modifydate'])))
+            return filename
+        except:
+            self.log.error("Error writing note: %s", note['key'])
+            self.log.debug("Exception: %s", sys.exc_info()[1])
+        return False
+
     def new(self, note):
         """
             Create a new note file, returns filename
@@ -67,18 +81,8 @@ class Note:
             if os.path.isfile(path + "/" + filename):
                 filename = filetime + "_" + filename  # Don't blast over files with same name, i.e. same first line.
 
-            try:
-                f = open(path + "/" + filename, 'w')
-                f.write(note['content'])
-                f.close()
-                self.log.info("Writing %s", filename)
-
-                os.utime(path + "/" + filename, (access_time, float(note['modifydate'])))
-
-                return filename
-            except:
-                self.log.error("Error writing note: %s", note['key'])
-                self.log.debug("Exception: %s", sys.exc_info()[1])
+            result = self.write(note, path + "/" + filename, access_time)
+            return result
         else:
             self.log.error("Error generating filename for note: %s", note['key'])
 
@@ -145,19 +149,9 @@ class Note:
         filename = nf_meta['filename']
         access_time = time.time()
 
-        try:
-            f = open(path + "/" + filename, 'w')
-            f.write(note['content'])
-            f.close()
-            self.log.info("Writing %s", filename)
-
-            os.utime(path + "/" + filename, (access_time, float(note['modifydate'])))
-
+        result = self.write(note, path + "/" + filename, access_time)
+        if result:
             return True
-        except:
-            self.log.error("Error writing note: %s", note['key'])
-            self.log.debug("Exception: %s", sys.exc_info()[1])
-
         return False
 
     def open(self, filename):
