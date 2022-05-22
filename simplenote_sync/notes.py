@@ -12,6 +12,15 @@ import time
 import datetime
 import re
 
+
+def file_birthtime(fstat_record):
+    # Where fstat_record is result from os.stat()
+    try:
+        return fstat_record.st_birthtime
+    except AttributeError:
+        return fstat_record.st_ctime
+
+
 class Note:
     """
         Main Note File (local file) object
@@ -45,6 +54,20 @@ class Note:
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 sys.exit(1)
 
+    def write(self, note, filename, access_time):
+        try:
+            f = open(filename, 'w', encoding='utf-8')
+            f.write(note['content'])
+            f.close()
+            self.log.info("Writing %s", filename)
+
+            os.utime(filename, (access_time, float(note['modifydate'])))
+            return filename
+        except:
+            self.log.error("Error writing note id: %s, %r", note['key'], filename, exc_info=True)
+            self.log.debug("Exception: %s", sys.exc_info()[1])
+        return False
+
     def new(self, note):
         """
             Create a new note file, returns filename
@@ -58,18 +81,8 @@ class Note:
             if os.path.isfile(path + "/" + filename):
                 filename = filetime + "_" + filename  # Don't blast over files with same name, i.e. same first line.
 
-            try:
-                f = open(path + "/" + filename, 'w')
-                f.write(note['content'])
-                f.close()
-                self.log.info("Writing %s", filename)
-
-                os.utime(path + "/" + filename, (access_time, float(note['modifydate'])))
-
-                return filename
-            except:
-                self.log.error("Error writing note: %s", note['key'])
-                self.log.debug("Exception: %s", sys.exc_info()[1])
+            result = self.write(note, path + "/" + filename, access_time)
+            return result
         else:
             self.log.error("Error generating filename for note: %s", note['key'])
 
@@ -120,7 +133,7 @@ class Note:
         path = self.config.get_config('cfg_nt_path')
 
         # WARNING THIS IS PLATFORM SPECIFIC
-        nf_meta['createdate'] = os.stat(path + "/" + filename).st_birthtime
+        nf_meta['createdate'] = file_birthtime(os.stat(path + "/" + filename))
         self.log.debug("Note File Meta Created: %s [%s]", nf_meta['createdate'], time.ctime(nf_meta['createdate']))
 
         nf_meta['modifydate'] = os.stat(path + "/" + filename).st_mtime
@@ -136,19 +149,9 @@ class Note:
         filename = nf_meta['filename']
         access_time = time.time()
 
-        try:
-            f = open(path + "/" + filename, 'w')
-            f.write(note['content'])
-            f.close()
-            self.log.info("Writing %s", filename)
-
-            os.utime(path + "/" + filename, (access_time, float(note['modifydate'])))
-
+        result = self.write(note, path + "/" + filename, access_time)
+        if result:
             return True
-        except:
-            self.log.error("Error writing note: %s", note['key'])
-            self.log.debug("Exception: %s", sys.exc_info()[1])
-
         return False
 
     def open(self, filename):
@@ -160,7 +163,7 @@ class Note:
 
         if os.path.isfile(path + "/" + filename):
             try:
-                f = open(path + "/" + filename, 'r')
+                f = open(path + "/" + filename, 'r', encoding='utf-8')
                 notefile['content'] = f.read()
                 f.close()
             except:
@@ -174,12 +177,7 @@ class Note:
         notefile['modifydate'] = os.stat(path + "/" + filename).st_mtime
         self.log.debug("Note File Modified: %s [%s]", notefile['modifydate'], time.ctime(notefile['modifydate']))
 
-        if re.match('darwin', sys.platform):
-            # WARNING THIS IS PLATFORM SPECIFIC
-            notefile['createdate'] = os.stat(path + "/" + filename).st_birthtime
-            self.log.debug("Note File Created: %s [%s]", notefile['createdate'], time.ctime(notefile['createdate']))
-        else:
-            notefile['createdate'] = notefile['modifydate']
-            self.log.debug("Using Modify Date for Birth/Create Date")
+        notefile['createdate'] = file_birthtime(os.stat(path + "/" + filename))
+        self.log.debug("Note File Created: %s [%s]", notefile['createdate'], time.ctime(notefile['createdate']))
 
         return notefile
