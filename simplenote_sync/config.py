@@ -30,7 +30,7 @@ class Config:
             'cfg_log_level'       : 'info'
         }
 
-        cp = configparser.SafeConfigParser(defaults)
+        cp = configparser.ConfigParser(defaults)
         if custom_file is not None:
             self.configs_read = cp.read([custom_file])
         else:
