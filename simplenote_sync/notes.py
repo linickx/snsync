@@ -12,6 +12,15 @@ import time
 import datetime
 import re
 
+
+def file_birthtime(fstat_record):
+    # Where fstat_record is result from os.stat()
+    try:
+        return fstat_record.st_birthtime
+    except AttributeError:
+        return fstat_record.st_ctime
+
+
 class Note:
     """
         Main Note File (local file) object
@@ -120,7 +129,7 @@ class Note:
         path = self.config.get_config('cfg_nt_path')
 
         # WARNING THIS IS PLATFORM SPECIFIC
-        nf_meta['createdate'] = os.stat(path + "/" + filename).st_birthtime
+        nf_meta['createdate'] = file_birthtime(os.stat(path + "/" + filename))
         self.log.debug("Note File Meta Created: %s [%s]", nf_meta['createdate'], time.ctime(nf_meta['createdate']))
 
         nf_meta['modifydate'] = os.stat(path + "/" + filename).st_mtime
@@ -174,12 +183,7 @@ class Note:
         notefile['modifydate'] = os.stat(path + "/" + filename).st_mtime
         self.log.debug("Note File Modified: %s [%s]", notefile['modifydate'], time.ctime(notefile['modifydate']))
 
-        if re.match('darwin', sys.platform):
-            # WARNING THIS IS PLATFORM SPECIFIC
-            notefile['createdate'] = os.stat(path + "/" + filename).st_birthtime
-            self.log.debug("Note File Created: %s [%s]", notefile['createdate'], time.ctime(notefile['createdate']))
-        else:
-            notefile['createdate'] = notefile['modifydate']
-            self.log.debug("Using Modify Date for Birth/Create Date")
+        notefile['createdate'] = file_birthtime(os.stat(path + "/" + filename))
+        self.log.debug("Note File Created: %s [%s]", notefile['createdate'], time.ctime(notefile['createdate']))
 
         return notefile
