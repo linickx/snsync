@@ -10,7 +10,6 @@ import string
 import hashlib
 import time
 import datetime
-import re
 
 
 def file_birthtime(fstat_record):
