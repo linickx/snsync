@@ -5,7 +5,7 @@ import os
 import sys
 import sqlite3
 import json
-# pylint: disable=W0702
+# pylint: disable=W0718
 # pylint: disable=C0301
 
 

@@ -1,7 +1,7 @@
 """
     Note File (local file) functions/settings for snsync
 """
-# pylint: disable=W0702
+# pylint: disable=W0718
 # pylint: disable=C0301
 
 import sys
@@ -39,7 +39,7 @@ class Note:
             try:
                 os.mkdir(self.config.get_config('cfg_nt_path'))
                 self.log.info("Creating directory %s", self.config.get_config('cfg_nt_path'))
-            except:
+            except Exception:
                 self.log.critical("Error creating directory %s", self.config.get_config('cfg_nt_path'))
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 sys.exit(1)
@@ -49,7 +49,7 @@ class Note:
             try:
                 os.mkdir(self.config.get_config('cfg_nt_path') + "/" + self.config.get_config('cfg_nt_trashpath'))
                 self.log.info("Creating directory %s", self.config.get_config('cfg_nt_path') + "/" + self.config.get_config('cfg_nt_trashpath'))
-            except:
+            except Exception:
                 self.log.critical("Error creating directory %s/%s", self.config.get_config('cfg_nt_path'), self.config.get_config('cfg_nt_trashpath'))
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 sys.exit(1)
@@ -63,7 +63,7 @@ class Note:
 
             os.utime(filename, (access_time, float(note['modifydate'])))
             return filename
-        except:
+        except Exception:
             self.log.error("Error writing note id: %s, %r", note['key'], filename, exc_info=True)
             self.log.debug("Exception: %s", sys.exc_info()[1])
         return False
@@ -95,7 +95,7 @@ class Note:
         note_data = str.splitlines(content)
         try:
             line_one = note_data[0]
-        except:
+        except Exception:
             self.log.info("Probable Empty note, no first line note content -> %s", str(content))
             self.log.debug("Exception: %s", sys.exc_info()[1])
             return False
@@ -114,7 +114,7 @@ class Note:
             self.log.debug("Make Safe In: %s Out: %s", line_one, safename)
             filename = safename.strip() + "." + file_ext
             return filename
-        except:
+        except Exception:
             self.log.debug("Exception: %s", sys.exc_info()[1])
             return False
 
@@ -166,7 +166,7 @@ class Note:
                 f = open(path + "/" + filename, 'r', encoding='utf-8')
                 notefile['content'] = f.read()
                 f.close()
-            except:
+            except Exception:
                 self.log.error("Failed to OPEN/READ: %s", path + "/" + filename)
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 return False

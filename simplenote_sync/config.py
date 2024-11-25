@@ -1,7 +1,7 @@
 """
     Configuration settings for snsync
 """
-# pylint: disable=W0702
+# pylint: disable=W0718
 # pylint: disable=C0301
 
 import os

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding=utf-8
 # I like catch-all excepts
-# pylint: disable=W0702
+# pylint: disable=W0718
 # Widescreen baby!
 # pylint: disable=C0301
 # No idea why pylint import fails.
@@ -100,7 +100,7 @@ def main(argv=sys.argv[1:]):
         opts, args = getopt.getopt(argv,
                                    'hdsc:',
                                    ['help', 'dry-run', 'silent', 'config='])
-    except:
+    except Exception:
         logger.debug("Exception: %s", sys.exc_info()[1])
         usage()
 
@@ -188,7 +188,7 @@ def main(argv=sys.argv[1:]):
 
     try:
         notes = simplenote.get_note_list() # the mac daddy important bit!
-    except:
+    except Exception:
         logger.debug("Exception: %s", sys.exc_info()[1])
         logger.critical("Simplenote Login Failed")
         if not silent_mode:
@@ -270,7 +270,7 @@ def main(argv=sys.argv[1:]):
                         if not dry_run:
                             try:
                                 os.rename(old_fqdn, new_fqdn)
-                            except:
+                            except Exception:
                                 logger.error("Failed to move file  %s -> %s", old_fqdn, new_fqdn)
                                 logger.debug("Exception: %s", sys.exc_info()[1])
 
@@ -319,7 +319,7 @@ def main(argv=sys.argv[1:]):
                         try:
                             os.rename(old_fqdn, new_fqdn)
                             logger.debug("TRASH | Old: %s New: %s", old_fqdn, new_fqdn)
-                        except:
+                        except Exception:
                             logger.error("Failed to move file  %s -> %s", old_fqdn, new_fqdn)
                             logger.debug("Exception: %s", sys.exc_info()[1])
 
@@ -339,7 +339,7 @@ def main(argv=sys.argv[1:]):
                     if thisnote_full[1] == 0:
                         try:
                             nf_filename
-                        except: # Catch critial AWOL Files
+                        except Exception: # Catch critial AWOL Files
                             nf_filename = note.get_filename(thisnote_full[0]['content'])
 
                         # Generate new notefile meta
