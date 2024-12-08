@@ -50,10 +50,11 @@ The following usage/options are available::
     Usage: snsync [OPTIONS]
 
     OPTIONS:
-     -h, --help         Help!
-     -d, --dry-run      Dry Run Mode (no changes made/saved)
-     -s, --silent       Silent Mode (no std output)
-     -c, --config=      Config file to read (default: ~/.snsync)
+     -h, --help             Help!
+     -d, --dry-run          Dry Run Mode (no changes made/saved)
+     -s, --silent           Silent Mode (no std output)
+     -D, --download-only    Don't push local changes back/up to Simplenote
+     -c, --config=          Config file to read (default: ~/.snsync)
 
 For example: just `snsync` on it's own should work, but something like this can be used for cron: `snsync -s --config=something.txt`
 

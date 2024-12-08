@@ -76,10 +76,11 @@ def usage():
 Usage: snsync [OPTIONS]
 
 OPTIONS:
- -h, --help         Help!
- -d, --dry-run      Dry Run Mode (no changes made/saved)
- -s, --silent       Silent Mode (no std output)
- -c, --config=      Config file to read (default: ~/.snsync)
+ -h, --help             Help!
+ -d, --dry-run          Dry Run Mode (no changes made/saved)
+ -s, --silent           Silent Mode (no std output)
+ -D, --download-only    Don't push local changes back/up to Simplenote
+ -c, --config=          Config file to read (default: ~/.snsync)
 
 Version: %s
 ''' % __version__)
@@ -94,12 +95,13 @@ def main(argv=sys.argv[1:]):
     dry_run = False
     silent_mode = False
     config_file = None
+    download_only = False
 
     # CMD Line options
     try:
         opts, args = getopt.getopt(argv,
-                                   'hdsc:',
-                                   ['help', 'dry-run', 'silent', 'config='])
+                                   'hdsDc:',
+                                   ['help', 'dry-run', 'silent', 'download-only', 'config='])
     except Exception:
         logger.debug("Exception: %s", sys.exc_info()[1])
         usage()
@@ -111,6 +113,8 @@ def main(argv=sys.argv[1:]):
             dry_run = True
         elif opt in ['-s', '--silent']:
             silent_mode = True
+        elif opt in ['-D', '--download-only']:
+            download_only = True
         elif opt in ['-c', '--config']:
             config_file = arg
         else:
@@ -209,6 +213,11 @@ def main(argv=sys.argv[1:]):
     counter_added = 0
     counter_deleted = 0
     counter_http_errors = 0
+
+    if download_only:
+        logger.info('Download Only Mode')
+        if not silent_mode:
+            print('Download Only Mode')
 
     if not silent_mode:
         print("Scanning %s Simplenotes" % len(notes))
@@ -435,58 +444,59 @@ def main(argv=sys.argv[1:]):
         sys.stdout.write("\n") # New Line for end of progress bar
 
     # Loop 2
-    if not silent_mode:
-        print("Scanning %s local files" % len(os.listdir(path)))
-        # Progress bar
-        sys.stdout.write("[%s]" % (" " * len(os.listdir(path))))
-        sys.stdout.flush()
-        sys.stdout.write("\b" * (len(os.listdir(path))+1)) # return to start of line, after '['
+    if not download_only:
+        if not silent_mode:
+            print("Scanning %s local files" % len(os.listdir(path)))
+            # Progress bar
+            sys.stdout.write("[%s]" % (" " * len(os.listdir(path))))
+            sys.stdout.flush()
+            sys.stdout.write("\b" * (len(os.listdir(path))+1)) # return to start of line, after '['
 
-    for notefile in os.listdir(path): # local search for new files
+        for notefile in os.listdir(path): # local search for new files
+
+            if not silent_mode:
+                if not silent_mode:
+                    time.sleep(0.05) # print doesn't work if too fast
+                    sys.stdout.write("#")
+                    sys.stdout.flush()
+
+            if notefile.endswith(file_ext): # only work with .txt file (or whatever!)
+                logger.debug('Checking NF: %s', notefile)
+
+                nf_meta = db.find_nf_by_name(notefile) # Note File Meta
+
+                if not nf_meta: # If there's no meta, this must be a new file
+                    logger.info('NEW notefile for upload: %s', notefile)
+                    counter_added += 1
+
+                    if not dry_run:
+                        nf_meta = note.gen_meta(notefile)
+                        nf_detail = note.open(notefile)
+
+                        new_sn_object = {}
+                        new_sn_object['key'] = nf_meta['key']
+                        new_sn_object['createdate'] = nf_meta['createdate']
+                        new_sn_object['modifydate'] = nf_meta['modifydate']
+                        new_sn_object['content'] = nf_detail['content']
+
+                        new_sn = simplenote.add_note(new_sn_object) # Add the note!
+                        logger.debug('API Result: %s', new_sn)
+
+                        if new_sn[1] == 0:
+                            logger.debug('New Simplenote Created: %s', new_sn)
+                            db.sn(new_sn[0]) # Update simplenote Cache
+                            db.nf(nf_meta) # Update notefile meta
+                        else:
+                            logger.error('Simplenote ADD Request FAILED [%s]', new_sn)
+                            counter_http_errors += 1
+                            counter_added -= 1
 
         if not silent_mode:
-            if not silent_mode:
-                time.sleep(0.05) # print doesn't work if too fast
-                sys.stdout.write("#")
-                sys.stdout.flush()
+            sys.stdout.write("\n") # New Line for end of progress bar
 
-        if notefile.endswith(file_ext): # only work with .txt file (or whatever!)
-            logger.debug('Checking NF: %s', notefile)
-
-            nf_meta = db.find_nf_by_name(notefile) # Note File Meta
-
-            if not nf_meta: # If there's no meta, this must be a new file
-                logger.info('NEW notefile for upload: %s', notefile)
-                counter_added += 1
-
-                if not dry_run:
-                    nf_meta = note.gen_meta(notefile)
-                    nf_detail = note.open(notefile)
-
-                    new_sn_object = {}
-                    new_sn_object['key'] = nf_meta['key']
-                    new_sn_object['createdate'] = nf_meta['createdate']
-                    new_sn_object['modifydate'] = nf_meta['modifydate']
-                    new_sn_object['content'] = nf_detail['content']
-
-                    new_sn = simplenote.add_note(new_sn_object) # Add the note!
-                    logger.debug('API Result: %s', new_sn)
-
-                    if new_sn[1] == 0:
-                        logger.debug('New Simplenote Created: %s', new_sn)
-                        db.sn(new_sn[0]) # Update simplenote Cache
-                        db.nf(nf_meta) # Update notefile meta
-                    else:
-                        logger.error('Simplenote ADD Request FAILED [%s]', new_sn)
-                        counter_http_errors += 1
-                        counter_added -= 1
-
-    if not silent_mode:
-        sys.stdout.write("\n") # New Line for end of progress bar
-
-    if not dry_run:
-        lastsync = db.update_snsync("sn_last_sync", time.time()) # record last sync
-    db.disconnect() # Saves the sqlite db.
+        if not dry_run:
+            lastsync = db.update_snsync("sn_last_sync", time.time()) # record last sync
+        db.disconnect() # Saves the sqlite db.
 
     # end of play report
     counter_changes = counter_modified + counter_added + counter_deleted
