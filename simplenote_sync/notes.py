@@ -98,7 +98,16 @@ class Note:
             self.log.info("Probable Empty note, no first line note content -> %s", str(content))
             self.log.debug("Exception: %s", sys.exc_info()[1])
             return False
-
+        
+        if line_one in ("\n", ""):
+            try:
+                line_one = line_one = note_data[1]
+            except Exception:   # Yes, this could be empty too, but gotta stop somewhere
+                self.log.error("2nd line broke..")
+                self.log.debug("Exception: %s", sys.exc_info()[1])
+            else:
+                self.log.info("Using 2nd line for filename")
+        
         file_ext = self.config.get_config('cfg_nt_ext')
         filename_len = int(self.config.get_config('cfg_nt_filenamelen'))
 
