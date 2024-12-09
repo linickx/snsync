@@ -298,7 +298,7 @@ def main(argv=sys.argv[1:]):
                     logger.critical("Local File [%s] DELETED but not marked for deletion locally, assuming delete SN -> [%s]", thisfile['filename'], n['key'])
                     counter_deleted += 1
 
-                    if not dry_run:
+                    if not dry_run and not download_only:
                         trash_note = simplenote.trash_note(n['key'])
                         logger.debug('API Result: %s', trash_note)
 
