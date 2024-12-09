@@ -331,6 +331,33 @@ class Simplenote(object):
             return self.update_note(note)
         else:
             return 0, note
+    
+    def restore_note(self, note_id):
+        """ Method to restore a note from the trash
+
+        Nick B Added - Opposite of trash_note
+
+        Arguments:
+            - note_id (string): key of the note to trash
+
+        Returns:
+            A tuple `(note, status)`
+
+            - note (dict): the newly created note or an error message
+            - status (int): 0 on success and -1 otherwise
+
+        """
+        # get note
+        note, status = self.get_note(note_id)
+        if (status == -1):
+            return note, status
+        if note["deleted"]:
+            note["deleted"] = False
+            note["modificationDate"] = time.time()
+            # update note
+            return self.update_note(note)
+        else:
+            return 0, note
 
     def delete_note(self, note_id):
         """ Method to permanently delete a note
