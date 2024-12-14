@@ -53,7 +53,8 @@ class Note:
                 self.log.debug("Exception: %s", sys.exc_info()[1])
                 sys.exit(1)
 
-    def write(self, note, filename, access_time):
+    def write(self, note, filename, access_time):       
+        self.log.debug('Filename: %s ', filename)
         try:
             f = open(filename, 'w', encoding='utf-8')
             f.write(note['content'])
@@ -109,6 +110,10 @@ class Note:
 
             if len(safename) >= filename_len: # truncate long names
                 safename = safename[:filename_len]
+            
+            if len(safename) == 0:
+                self.log.error("Filename is empty!")
+                return False
 
             self.log.debug("Make Safe In: %s Out: %s", line_one, safename)
             filename = safename.strip() + "." + file_ext
@@ -145,7 +150,7 @@ class Note:
             Create a new note file, returns filename
         """
         path = self.config.get_config('cfg_nt_path')
-        filename = nf_meta['filename']
+        filename = str(nf_meta['filename'])
         access_time = time.time()
 
         result = self.write(note, path + "/" + filename, access_time)

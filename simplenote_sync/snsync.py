@@ -360,10 +360,9 @@ def main(argv=sys.argv[1:]):
                         nf_meta['deleted'] = n['deleted']
 
                         db.sn(n) # Update simplenote Cache
-
-                        if str(nf_meta['filename']) != "False":
-                            db.nf(nf_meta) # Update notefile meta
-                            thisnote_file = note.update(thisnote_full[0], nf_meta) # Write to file
+                        db.nf(nf_meta) # Update notefile meta
+                        
+                        thisnote_file = note.update(thisnote_full[0], nf_meta) # Write to file
                     else:
                         logger.error('Simplenote DOWNLOAD Request FAILED [%s]', n['key'])
                         counter_http_errors += 1
